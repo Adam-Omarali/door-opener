@@ -58,5 +58,7 @@ void loop()
         lcd.print("LOCKED OUT    "); 
         lcd.setCursor(0, 1);
         lcd.print("DOOR OPENER   "); 
+        
+        digitalWrite(TEST_LED, LOW);
     }
 }
