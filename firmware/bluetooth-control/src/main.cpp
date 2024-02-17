@@ -30,7 +30,9 @@ void loop()
         lcd.setCursor(0, 0); 
         lcd.print("BLUETOOTH     ");
         lcd.setCursor(0, 1); 
-        lcd.print("PAIRING       "); 
+        lcd.print("PAIRING       ");
+        
+         
     }
     else {
         lcd.setCursor(0, 0);
