@@ -8,23 +8,25 @@
 
     <Button
         android:id="@+id/button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Pair to Device"
+        android:layout_width="179dp"
+        android:layout_height="73dp"
+        android:text="PAIR TO DEVICE"
+        android:background="@color/green"
 
         app:layout_constraintBottom_toTopOf="@+id/button2"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.8" />
+        app:layout_constraintVertical_bias="0.872" />
 
     <Button
         android:id="@+id/button2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="320dp"
-        android:text="Unlock Door"
+        android:layout_width="178dp"
+        android:layout_height="73dp"
+        android:layout_marginBottom="212dp"
+        android:text="UNLOCK DOOR"
+        android:background="@color/green"
+
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
