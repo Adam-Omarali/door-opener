@@ -10,9 +10,9 @@
 #define D5 10
 #define D6 11 
 #define D7 12
-#define TEST_LED 3
-#define RX_PIN 0 
-#define TX_PIN 1 
+#define TEST_LED 4
+#define RX_PIN 2 
+#define TX_PIN 3 
 
 LiquidCrystal lcd(RS, ENABLE, D4, D5, D6, D7); 
 SoftwareSerial bluetooth(RX_PIN, TX_PIN); 
@@ -32,9 +32,8 @@ void setup()
     lcd.setCursor(0, 1);
     lcd.print("DOOR OPENER"); 
 
-    bluetooth.begin(9600); 
-
     Serial.begin(9600);
+    bluetooth.begin(38400); 
 }
 
 void loop() 
@@ -45,8 +44,11 @@ void loop()
         lcd.setCursor(0, 1); 
         lcd.print("PAIRING       ");
         
-        if (bluetooth.available()) {
+        if (bluetooth.available() > 0) {
             digitalWrite(TEST_LED, HIGH);
+            char data = bluetooth.read();
+            Serial.print(data);
+
         } else {
             digitalWrite(TEST_LED, LOW); 
         }
