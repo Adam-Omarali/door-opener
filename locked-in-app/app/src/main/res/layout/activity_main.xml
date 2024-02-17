@@ -77,8 +77,22 @@
         app:layout_constraintHorizontal_bias="0.492"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <TextView
+        android:id="@+id/text_bluetooth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="388dp"
+        android:text="Automating the dorm room lock"
+        android:textSize="20dp"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <Button
-        android:id="@+id/button"
+        android:id="@+id/bluetooth_pair"
         android:layout_width="250dp"
         android:layout_height="100dp"
         android:background="@drawable/rounded_button_background"
@@ -86,7 +100,7 @@
         android:textColor="@color/white"
         android:textSize="25dp"
 
-        app:layout_constraintBottom_toTopOf="@+id/button2"
+        app:layout_constraintBottom_toTopOf="@+id/unlock_door"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.496"
         app:layout_constraintStart_toStartOf="parent"
@@ -94,7 +108,7 @@
         app:layout_constraintVertical_bias="0.905" />
 
     <Button
-        android:id="@+id/button2"
+        android:id="@+id/unlock_door"
         android:layout_width="250dp"
         android:layout_height="100dp"
         android:layout_marginBottom="64dp"
