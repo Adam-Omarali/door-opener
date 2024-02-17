@@ -1,10 +1,11 @@
-package com.droiduino.bluetoothconn;
+package com.example.locked_in;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -23,7 +24,7 @@ import java.io.OutputStream;
 import java.util.UUID;
 import static android.content.ContentValues.TAG;
 
-public class bluetooth_button extends AppCompatActivity {
+public class BluetoothButton extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +39,7 @@ public class bluetooth_button extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Get the application context
-                Context context = bluetooth_button.this;
+                Context context = BluetoothButton.this;
 
                 // Create AlertDialog builder
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
