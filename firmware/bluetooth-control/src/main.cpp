@@ -32,7 +32,7 @@ void setup()
     lcd.setCursor(0, 1);
     lcd.print("DOOR OPENER"); 
 
-    bluetooth.begin(9600); 
+    bluetooth.begin(38400); 
 
     Serial.begin(9600);
 }
@@ -45,10 +45,10 @@ void loop()
         lcd.setCursor(0, 1); 
         lcd.print("PAIRING       ");
         
-        if (bluetooth.available()) {
-            digitalWrite(TEST_LED, HIGH);
+        if (bluetooth.available() > 0) {
+            digitalWrite(TEST_LED, LOW);
         } else {
-            digitalWrite(TEST_LED, LOW); 
+            digitalWrite(TEST_LED, HIGH); 
         }
     }
     else {
