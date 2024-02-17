@@ -37,22 +37,29 @@ public class bluetooth_button extends AppCompatActivity {
         pairToDeviceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(bluetooth_button.this);
-                builder.setTitle("Pair to Device");
-                builder.setMessage("Are you sure you want to pair to the device?");
-                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                // Get the application context
+                Context context = bluetooth_button.this;
+
+                // Create AlertDialog builder
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setTitle("Connection Status");
+
+                // Set a custom layout for the dialog
+                View dialogLayout = getLayoutInflater().inflate(R.layout.loading_dialog, null);
+                builder.setView(dialogLayout);
+
+                // Show the dialog
+                AlertDialog dialog = builder.create();
+                dialog.show();
+
+                // Simulate a delay using a Handler to dismiss the dialog after a certain time
+                new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // Add your logic for pairing to the device here
+                    public void run() {
+                        // Dismiss the dialog after 3 seconds
+                        dialog.dismiss();
                     }
-                });
-                builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss(); // Dismiss the dialog
-                    }
-                });
-                builder.show();
+                }, 3000);
             }
         });
     }
