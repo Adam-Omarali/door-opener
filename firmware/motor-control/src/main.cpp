@@ -1,18 +1,43 @@
 #include <Arduino.h>
+#include <Stepper.h> 
 
-// put function declarations here:
-int myFunction(int, int);
+#define STEPS 200
+// Define stepper motor connections and motor interface type. Motor interface type must be set to 1 when using a driver
+
+#define motorInterfaceType 1
+Stepper stepper(STEPS, 2, 3); // Pin 2 connected to DIRECTION & Pin 3 connected to STEP Pin of Driver
+
+int Pval = 0;
+
+int potVal = 0;
+
 
 void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+  // Set the maximum speed in steps per second:
+  Serial.begin(9600);
+
+  stepper.setSpeed(1000);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-}
+  stepper.step(10);
+  // potVal = map(analogRead(A0),0,1024,0,500);
+  // if (potVal>Pval){
+  //   stepper.step(10);
+  //   Serial.println("forward");
+  // }
+  
+  //Serial.println(potVal);
 
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+  //if (potVal<Pval){
+  
+  //Serial.println(potVal);
+
+  //if (potVal<Pval){
+  //  stepper.step(10);
+    //Serial.print("backward");
+  //}
+
+
+Pval = potVal;
 }
