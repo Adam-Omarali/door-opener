@@ -31,7 +31,6 @@ void loop()
 {
   Serial.println("Forward");
   stepper.step(STEPS * 10);
-  delay(5000);
 
   if (analogRead(INTERBOARD_ANALOG) >= 1023 - TOLERANCE) {
     digitalWrite(TEST_LED, HIGH); 
