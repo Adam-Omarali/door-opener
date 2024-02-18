@@ -1,21 +1,20 @@
-#include <Arduino.h>
-#include <SoftwareSerial.h>
+#include <ArduinoBLE.h>
 
-#define RX_PIN 2 
-
-
-SoftwareSerial bluetooth()
+#define LED 21 
+#define PAIRING_BUTTON 2 
 
 void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+  pinMode(LED, OUTPUT); 
+  pinMode(PAIRING_BUTTON, INPUT_PULLUP);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-}
-
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+  Serial.print("HI");
+  digitalWrite(LED, HIGH); 
+  /*
+  if (digitalRead(PAIRING_BUTTON) == LOW) {
+    digitalWrite(LED, HIGH); 
+  } else {
+    digitalWrite(LED, LOW); 
+  }*/
 }

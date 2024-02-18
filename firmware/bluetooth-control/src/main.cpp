@@ -11,8 +11,8 @@
 #define D6 11 
 #define D7 12
 #define TEST_LED 4
-#define RX_PIN 2 
-#define TX_PIN 3 
+#define RX_PIN 0
+#define TX_PIN 1
 #define INTERBOARD_COMMS 13 
 
 #define UNLOCK "<unlock door>"
@@ -35,8 +35,6 @@ void setup()
 
     pinMode(INTERBOARD_COMMS, OUTPUT); 
 
-    bluetooth.begin(9600); 
-
     digitalWrite(INTERBOARD_COMMS, LOW);
 
     lcd.begin(16, 2); 
@@ -44,14 +42,17 @@ void setup()
     lcd.setCursor(0, 1);
     lcd.print("DOOR OPENER"); 
 
-    Serial.begin(9600);
-
     command = ""; 
+
+    Serial.begin(9600); 
+    bluetooth.begin(115200); 
 }
 
 void loop() 
 {
     digitalWrite(INTERBOARD_COMMS, HIGH); 
+
+    Serial.println(bluetooth.available());
     
     if (digitalRead(PAIRING_BUTTON) == LOW) {
         lcd.setCursor(0, 0); 
@@ -77,10 +78,11 @@ void loop()
         digitalWrite(TEST_LED, LOW);
     }
 
+    /*
     if (Serial.available() > 0) {
         command = Serial.readString(); 
         Serial.println("Command: " + command); 
-    }
+    }*/
 
     if (command == UNLOCK) {
 
