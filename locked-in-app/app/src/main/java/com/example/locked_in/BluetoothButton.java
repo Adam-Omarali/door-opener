@@ -46,8 +46,8 @@ public class BluetoothButton extends AppCompatActivity {
                 builder.setTitle("Connection Status");
 
                 // Set a custom layout for the dialog
-                View dialogLayout = getLayoutInflater().inflate(R.layout.loading_dialog, null);
-                builder.setView(dialogLayout);
+                //View dialogLayout = getLayoutInflater().inflate(R.layout.loading_dialog, null);
+                //builder.setView(dialogLayout);
 
                 // Show the dialog
                 AlertDialog dialog = builder.create();

@@ -27,7 +27,7 @@ import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Context mainActivityContext;
+    public Context mainActivityContext;
     private String deviceName = null;
     private String deviceAddress = null;
 

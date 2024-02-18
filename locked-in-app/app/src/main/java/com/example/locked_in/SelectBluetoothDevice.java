@@ -1,5 +1,6 @@
 package com.example.locked_in;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -15,6 +16,7 @@ import android.net.wifi.p2p.WifiP2pManager.DeviceInfoListener;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
 
@@ -25,7 +27,11 @@ import java.util.Set;
 
 public class SelectBluetoothDevice extends AppCompatActivity {
 
-    public static int BLUETOOTH_CONNECT_REQUEST_CODE = 0;
+    public static int BLUETOOTH_CONNECT_REQUEST_CODE = 1;
+
+    private BluetoothAdapter bluetoothAdapter;
+    private List<DeviceInfoModel> deviceList;
+    private DeviceListAdapter deviceListAdapter;
 
     @RequiresApi(api = Build.VERSION_CODES.S)
     @Override
@@ -33,43 +39,96 @@ public class SelectBluetoothDevice extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_bluetooth_device);
 
-        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-            String[] permissions = {Manifest.permission.BLUETOOTH_CONNECT};
-
-            ActivityCompat.requestPermissions(this, permissions, BLUETOOTH_CONNECT_REQUEST_CODE);
+        if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled()) {
+            // Try reconnecting
             return;
         }
 
-        Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
-        List<DeviceInfoModel> deviceList = new ArrayList<DeviceInfoModel>();
+        searchForDevices();
+        requestBluetoothPermission();
+    }
 
-        if (pairedDevices.size() > 0) {
-             for (BluetoothDevice device : pairedDevices) {
-                 String deviceName = device.getName();
-                 String deviceHardwareAddress = device.getAddress();
-
-                 DeviceInfoModel deviceInfoModel = new DeviceInfoModel(deviceName, deviceHardwareAddress);
-                 deviceList.add(deviceInfoModel);
-             }
-
-             RecyclerView recyclerView = findViewById(R.id.recyclerViewDevice);
-             recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-             DeviceListAdapter deviceListAdapter = new DeviceListAdapter(this, deviceList);
-             recyclerView.setAdapter(deviceListAdapter);
-             recyclerView.setItemAnimator(new DefaultItemAnimator());
+    @RequiresApi(api = Build.VERSION_CODES.S)
+    private void requestBluetoothPermission() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.BLUETOOTH}, BLUETOOTH_CONNECT_REQUEST_CODE);
         } else {
-            View view = findViewById(R.id.recyclerViewDevice);
-            Snackbar snackbar = Snackbar.make(view, "Pair Bluetooth Device", Snackbar.LENGTH_INDEFINITE);
-            snackbar.setAction("OK", new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-
-                }
-            });
-            snackbar.show();
+            retrievePairedDevices();
         }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.S)
+    private void retrievePairedDevices() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.BLUETOOTH_CONNECT},
+                    BLUETOOTH_CONNECT_REQUEST_CODE);
+            return;
+        }
+        Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
+        List<DeviceInfoModel> deviceList = new ArrayList<>();
+
+        for (BluetoothDevice device : pairedDevices) {
+            String deviceName = device.getName();
+            String deviceHardwareAddress = device.getAddress();
+            deviceList.add(new DeviceInfoModel(deviceName, deviceHardwareAddress));
+        }
+
+        setupRecyclerView(deviceList);
+    }
+
+    private void setupRecyclerView(List<DeviceInfoModel> deviceList) {
+        if (deviceList.isEmpty()) {
+            // No paired devices available
+            // display appropriate message to user
+            Toast.makeText(this, "NO PAIRED DEVICES", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        RecyclerView recyclerView = findViewById(R.id.recyclerViewDevice);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        deviceListAdapter = new DeviceListAdapter(this, deviceList);
+        recyclerView.setAdapter(deviceListAdapter);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.S)
+    private void searchForDevices() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.BLUETOOTH_SCAN},
+                    BLUETOOTH_CONNECT_REQUEST_CODE);
+            return;
+        }
+        if (!bluetoothAdapter.isDiscovering()) {
+            bluetoothAdapter.startDiscovery();
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.S)
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == BLUETOOTH_CONNECT_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                retrievePairedDevices();
+            } else {
+                // Permission denied, handle accordingly
+                Toast.makeText(this, "COULD NOT CONNECT", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    // Method to handle the click event of the pairing button
+    @RequiresApi(api = Build.VERSION_CODES.S)
+    public void onPairingButtonClick(View view) {
+        // Perform Bluetooth device discovery
+        searchForDevices();
     }
 }
