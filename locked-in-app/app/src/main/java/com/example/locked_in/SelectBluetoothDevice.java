@@ -9,6 +9,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.pm.PackageManager;
@@ -26,10 +30,10 @@ import java.util.Set;
 public class SelectBluetoothDevice extends AppCompatActivity {
 
     public static int BLUETOOTH_CONNECT_REQUEST_CODE = 1;
-
     private BluetoothAdapter bluetoothAdapter;
     private List<DeviceInfoModel> deviceList;
     private DeviceListAdapter deviceListAdapter;
+    private BroadcastReceiver discoveryReceiver;
 
     @RequiresApi(api = Build.VERSION_CODES.S)
     @Override
@@ -37,15 +41,23 @@ public class SelectBluetoothDevice extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_bluetooth_device);
 
-        final Button refresh_devices = findViewById(R.id.refresh_device);
-
+        // Initialize BluetoothAdapter
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
         if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled()) {
             // Try reconnecting
+            // bluetooth not supported or not enabled
             return;
         }
 
+        // Initialize device list and adapter
+        deviceList = new ArrayList<>();
+        deviceListAdapter = new DeviceListAdapter(this, deviceList);
+
+        // Register BroadcastReceiver for Bluetooth discovery
+        registerDiscoveryReceiver();
+
+        // Button click listener for refreshing devices
+        final Button refresh_devices = findViewById(R.id.refresh_device);
         refresh_devices.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -55,8 +67,51 @@ public class SelectBluetoothDevice extends AppCompatActivity {
             }
         });
 
+        // Start bluetooth discovery
         searchForDevices();
         requestBluetoothPermission();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.S)
+    private void registerDiscoveryReceiver() {
+        // Setting up BroadcastReceiver for Bluetooth discovery
+        discoveryReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                    // A new device has been found during discovery
+                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                    if (device != null) {
+                        String deviceName = device.getName();
+                        String deviceAddress = device.getAddress();
+                        deviceList.add(new DeviceInfoModel(deviceName, deviceAddress));
+                        deviceListAdapter.notifyDataSetChanged();
+                    }
+                } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                    // Discovery has finished, you can perform any post-discovery actions here
+                }
+            }
+        };
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BluetoothDevice.ACTION_FOUND);
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+        registerReceiver(discoveryReceiver, filter);
+    }
+
+    // start bluetooth discovery
+    @RequiresApi(api = Build.VERSION_CODES.S)
+    private void searchForDevices() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.BLUETOOTH_SCAN},
+                    BLUETOOTH_CONNECT_REQUEST_CODE);
+            return;
+        }
+        if (!bluetoothAdapter.isDiscovering()) {
+            bluetoothAdapter.startDiscovery();
+        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.S)
@@ -91,6 +146,7 @@ public class SelectBluetoothDevice extends AppCompatActivity {
         setupRecyclerView(deviceList);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.S)
     private void setupRecyclerView(List<DeviceInfoModel> deviceList) {
         if (deviceList.isEmpty()) {
             // No paired devices available
@@ -108,20 +164,6 @@ public class SelectBluetoothDevice extends AppCompatActivity {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.S)
-    private void searchForDevices() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.BLUETOOTH_SCAN},
-                    BLUETOOTH_CONNECT_REQUEST_CODE);
-            return;
-        }
-        if (!bluetoothAdapter.isDiscovering()) {
-            bluetoothAdapter.startDiscovery();
-        }
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.S)
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -135,10 +177,14 @@ public class SelectBluetoothDevice extends AppCompatActivity {
         }
     }
 
-    // Method to handle the click event of the pairing button
     @RequiresApi(api = Build.VERSION_CODES.S)
-    public void onPairingButtonClick(View view) {
-        // Perform Bluetooth device discovery
-        searchForDevices();
+    // unregister BroadcastReceiver when activity is destroyed
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (discoveryReceiver != null) {
+            unregisterReceiver(discoveryReceiver);
+        }
     }
+
 }
