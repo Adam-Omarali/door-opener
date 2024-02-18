@@ -13,6 +13,7 @@
 #define TEST_LED 4
 #define RX_PIN 2 
 #define TX_PIN 3 
+#define INTERBOARD_COMMS 13 
 
 LiquidCrystal lcd(RS, ENABLE, D4, D5, D6, D7); 
 SoftwareSerial bluetooth(RX_PIN, TX_PIN); 
@@ -27,6 +28,10 @@ void setup()
     pinMode(RX_PIN, INPUT); 
     pinMode(TX_PIN, OUTPUT); 
 
+    pinMode(INTERBOARD_COMMS, OUTPUT); 
+
+    digitalWrite(INTERBOARD_COMMS, LOW);
+
     lcd.begin(16, 2); 
     lcd.print("LOCKED OUT"); 
     lcd.setCursor(0, 1);
@@ -38,6 +43,8 @@ void setup()
 
 void loop() 
 {
+    digitalWrite(INTERBOARD_COMMS, HIGH); 
+    
     if (digitalRead(PAIRING_BUTTON) == LOW) {
         lcd.setCursor(0, 0); 
         lcd.print("BLUETOOTH     ");
@@ -58,7 +65,7 @@ void loop()
         lcd.print("LOCKED OUT    "); 
         lcd.setCursor(0, 1);
         lcd.print("DOOR OPENER   "); 
-        
+
         digitalWrite(TEST_LED, LOW);
     }
 }
