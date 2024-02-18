@@ -41,6 +41,16 @@ public class SelectBluetoothDevice extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_bluetooth_device);
 
+        final Button home = findViewById(R.id.backButton);
+
+        home.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(SelectBluetoothDevice.this, MainActivity.class);
+                startActivity(intent);
+            }
+        });
+
         // Initialize BluetoothAdapter
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled()) {

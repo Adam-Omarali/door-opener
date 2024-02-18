@@ -71,8 +71,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         final Button buttonConnect = findViewById(R.id.bluetooth_pair);
-
         final Button buttonMotor = findViewById(R.id.unlock_door);
+        final Button buttonDisconnect = findViewById(R.id.disconnect);
 
         final TextView textViewinfo = findViewById(R.id.headingText);
 
@@ -88,6 +88,14 @@ public class MainActivity extends AppCompatActivity {
             BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             createConnectThread = new CreateConnectThread(bluetoothAdapter, deviceAddress, this, this);
             createConnectThread.start();
+
+            buttonDisconnect.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    createConnectThread.cancel();
+                    connectedThread.cancel();
+                }
+            });
         }
 
         handler = new Handler(Looper.getMainLooper()) {
@@ -119,6 +127,15 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        if (deviceName == null) {
+            buttonDisconnect.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Toast.makeText(MainActivity.this, "No Current Connections!", Toast.LENGTH_LONG).show();
+                }
+            });
+        }
 
         buttonMotor.setOnClickListener(new View.OnClickListener() {
             @Override
