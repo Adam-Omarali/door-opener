@@ -74,8 +74,6 @@ public class MainActivity extends AppCompatActivity {
 
         final Button buttonMotor = findViewById(R.id.unlock_door);
 
-        final Toolbar toolbar = findViewById(R.id.toolbar);
-
         final TextView textViewinfo = findViewById(R.id.headingText);
 
         deviceName = getIntent().getStringExtra("deviceName");
@@ -85,30 +83,12 @@ public class MainActivity extends AppCompatActivity {
 
             buttonConnect.setEnabled(false);
             buttonConnect.setText("Device Paired");
-            toolbar.setSubtitle("Connecting to " + deviceName + "...");
 
             // Connect to device
             BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             createConnectThread = new CreateConnectThread(bluetoothAdapter, deviceAddress, this, this);
             createConnectThread.start();
         }
-
-        // discover bluetooth button click
-        buttonConnect.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.BLUETOOTH_SCAN)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(MainActivity.this,
-                            new String[] {Manifest.permission.BLUETOOTH_SCAN}, BLUETOOTH_CONNECT_CODE);
-                    return;
-                }
-                if (!bluetoothAdapter.isDiscovering()) {
-                    Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-                    startActivityForResult(intent, REQUEST_DISCOVER_BT);
-                }
-            }
-        });
 
         handler = new Handler(Looper.getMainLooper()) {
             @Override
@@ -117,11 +97,9 @@ public class MainActivity extends AppCompatActivity {
                     case CONNECTING_STATUS:
                         switch (msg.arg1) {
                             case 1:
-                                toolbar.setSubtitle("Connected to " + deviceName);
                                 buttonConnect.setEnabled(true);
                                 break;
                             case -1:
-                                toolbar.setSubtitle("Device fails to connect.");
                                 buttonConnect.setEnabled(true);
                                 break;
                         }
@@ -137,16 +115,6 @@ public class MainActivity extends AppCompatActivity {
         buttonConnect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!bluetoothAdapter.isEnabled()) {
-                    Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                    if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.BLUETOOTH_CONNECT)
-                            != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(MainActivity.this,
-                                new String[] {Manifest.permission.BLUETOOTH_CONNECT}, BLUETOOTH_CONNECT_CODE);
-                    }
-                    startActivityForResult(intent, REQUEST_ENABLE_BT);
-                }
-
                 Intent intent = new Intent(MainActivity.this, SelectBluetoothDevice.class);
                 startActivity(intent);
             }

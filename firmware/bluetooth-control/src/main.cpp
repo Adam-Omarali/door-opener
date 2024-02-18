@@ -15,8 +15,13 @@
 #define TX_PIN 3 
 #define INTERBOARD_COMMS 13 
 
+#define UNLOCK "<unlock door>"
+#define LOCK "<lock door>"
+
 LiquidCrystal lcd(RS, ENABLE, D4, D5, D6, D7); 
 SoftwareSerial bluetooth(RX_PIN, TX_PIN); 
+
+String command; 
 
 int pairing_requests = 0; 
 
@@ -30,6 +35,8 @@ void setup()
 
     pinMode(INTERBOARD_COMMS, OUTPUT); 
 
+    bluetooth.begin(9600); 
+
     digitalWrite(INTERBOARD_COMMS, LOW);
 
     lcd.begin(16, 2); 
@@ -38,7 +45,8 @@ void setup()
     lcd.print("DOOR OPENER"); 
 
     Serial.begin(9600);
-    bluetooth.begin(38400); 
+
+    command = ""; 
 }
 
 void loop() 
@@ -67,5 +75,20 @@ void loop()
         lcd.print("DOOR OPENER   "); 
 
         digitalWrite(TEST_LED, LOW);
+    }
+
+    if (Serial.available() > 0) {
+        command = Serial.readString(); 
+        Serial.println("Command: " + command); 
+    }
+
+    if (command == UNLOCK) {
+
+    } 
+    else if (command == LOCK) {
+
+    }
+    else {
+
     }
 }
