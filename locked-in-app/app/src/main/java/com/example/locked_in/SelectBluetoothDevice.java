@@ -12,14 +12,11 @@ import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.pm.PackageManager;
-import android.net.wifi.p2p.WifiP2pManager.DeviceInfoListener;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
-
-import com.google.android.material.snackbar.Snackbar;
 
 import java.sql.Array;
 import java.util.ArrayList;
@@ -52,6 +49,7 @@ public class SelectBluetoothDevice extends AppCompatActivity {
         refresh_devices.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 searchForDevices();
                 requestBluetoothPermission();
             }

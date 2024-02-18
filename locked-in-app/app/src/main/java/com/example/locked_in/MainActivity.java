@@ -34,6 +34,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.UUID;
 
+// Bluetooth Process
+// (credits to https://medium.com/swlh/create-custom-android-app-to-control-arduino-board-using-bluetooth-ff878e998aa8)
+
+// Initialize Default Bluetooth Device on Android Phone
+// Get MAC Address of HC05 Bluetooth Module
+// Create thread to initiate connection
+// Connection is successful -> thread does call backs for data exchange
+// Thread reads data transmission
 public class MainActivity extends AppCompatActivity {
 
     public Context mainActivityContext;
@@ -59,6 +67,10 @@ public class MainActivity extends AppCompatActivity {
 
         final Button buttonConnect = findViewById(R.id.bluetooth_pair);
 
+        final Button buttonMotor = findViewById(R.id.unlock_door);
+
+        final Toolbar toolbar = findViewById(R.id.toolbar);
+
         final TextView textViewinfo = findViewById(R.id.headingText);
 
         deviceName = getIntent().getStringExtra("deviceName");
@@ -67,11 +79,13 @@ public class MainActivity extends AppCompatActivity {
             deviceAddress = getIntent().getStringExtra("deviceAddress");
 
             buttonConnect.setEnabled(false);
+            buttonConnect.setText("Device Paired");
+            toolbar.setSubtitle("Connecting to " + deviceName + "...");
 
             // Connect to device
             BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-            createConnectThread = new CreateConnectThread(bluetoothAdapter, deviceAddress, this, MainActivity.this);
-            createConnectThread.run();
+            createConnectThread = new CreateConnectThread(bluetoothAdapter, deviceAddress, this, this);
+            createConnectThread.start();
         }
 
         handler = new Handler(Looper.getMainLooper()) {
@@ -81,9 +95,11 @@ public class MainActivity extends AppCompatActivity {
                     case CONNECTING_STATUS:
                         switch (msg.arg1) {
                             case 1:
+                                toolbar.setSubtitle("Connected to " + deviceName);
                                 buttonConnect.setEnabled(true);
                                 break;
                             case -1:
+                                toolbar.setSubtitle("Device fails to connect.");
                                 buttonConnect.setEnabled(true);
                                 break;
                         }
@@ -91,13 +107,8 @@ public class MainActivity extends AppCompatActivity {
 
                     case MESSAGE_READ:
                         String arduinoMsg = msg.obj.toString();
-
-                        switch (arduinoMsg.toLowerCase()) {
-                            default:
-                                break;
-                        }
+                        break;
                 }
-
             }
         };
 
@@ -109,30 +120,44 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Bluetooth Process
-        // (credits to https://medium.com/swlh/create-custom-android-app-to-control-arduino-board-using-bluetooth-ff878e998aa8)
+        buttonMotor.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String command = null;
+                String state = buttonMotor.getText().toString().toLowerCase();
 
-        // Initialize Default Bluetooth Device on Android Phone
-        // Get MAC Address of HC05 Bluetooth Module
-        // Create thread to initiate connection
-        // Connection is successful -> thread does call backs for data exchange
-        // Thread reads data transmission
+                switch (state) {
+                    case "unlock door":
+                        buttonMotor.setText("LOCK DOOR");
+                        command = "<unlock door>";
+                        break;
+                    case "lock door":
+                        buttonMotor.setText("UNLOCK DOOR");
+                        command = "<lock door>";
+                        break;
+                    default:
+                        buttonMotor.setText("NO COMMAND");
+                        command = "<no command>";
+                        break;
+                }
 
+                connectedThread.write(command);
+            }
+        });
     }
 
     public static class CreateConnectThread extends Thread {
         private final Context context;
         private final Activity activity;
-
         private final BluetoothSocket bluetoothSocket;
 
         @RequiresApi(api = Build.VERSION_CODES.S)
         public CreateConnectThread(BluetoothAdapter bluetoothAdapter, String address, Context context, Activity activity) {
-            BluetoothDevice bluetoothDevice = bluetoothAdapter.getRemoteDevice(address);
-            BluetoothSocket tempSocket = null;
-
             this.context = context;
             this.activity = activity;
+
+            BluetoothDevice bluetoothDevice = bluetoothAdapter.getRemoteDevice(address);
+            BluetoothSocket tempSocket = null;
 
             if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
 
@@ -143,9 +168,15 @@ public class MainActivity extends AppCompatActivity {
             UUID uuid = bluetoothDevice.getUuids()[0].getUuid();
 
             try {
+                tempSocket = bluetoothDevice.createRfcommSocketToServiceRecord(uuid);
+            } catch (IOException e) {
+                Log.e("SOCKET ERROR", "SECURE SOCKET FAILED", e);
+            }
+
+            try {
                 tempSocket = bluetoothDevice.createInsecureRfcommSocketToServiceRecord(uuid);
             } catch (IOException e) {
-                Log.e("SOCKET ERROR", "createSocket() failed", e);
+                Log.e("SOCKET ERROR", "INSECURE SOCKET FAILED", e);
             }
 
             bluetoothSocket = tempSocket;
@@ -153,13 +184,15 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @RequiresApi(api = Build.VERSION_CODES.S)
+        @Override
         public void run() {
             BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_SCAN)
+
+            /* if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_SCAN)
                     != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.BLUETOOTH_SCAN}, BLUETOOTH_CONNECT_CODE);
             }
-            bluetoothAdapter.cancelDiscovery();
+            bluetoothAdapter.cancelDiscovery();*/
 
             try {
                 if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT)
@@ -167,16 +200,25 @@ public class MainActivity extends AppCompatActivity {
 
                     ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.BLUETOOTH_CONNECT},
                             BLUETOOTH_CONNECT_CODE);
-                    return;
                 }
 
                 // Attempt insecure bluetooth connections.
-                turnBluetoothOn();
-                bluetoothSocket.connect();
+                try {
+                    if (!bluetoothAdapter.isEnabled()) {
+                        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.BLUETOOTH_CONNECT}, BLUETOOTH_CONNECT_CODE);
+                        }
+                        bluetoothAdapter.enable();
+                    }
 
-                Log.e("STATUS", "Device connected");
-                handler.obtainMessage(CONNECTING_STATUS, 1, -1).sendToTarget();
-            } catch (IOException e) {
+                    bluetoothSocket.connect();
+                    Log.e("SOCKET STATUS MAIN", "CONNECTED");
+                    handler.obtainMessage(CONNECTING_STATUS, 1, -1).sendToTarget();
+
+                } catch (Exception e) {
+                    Log.e("ENABLE FAILED", "TURN BLUETOOTH ON");
+                }
+            } catch (Exception e) {
                 try {
                     bluetoothSocket.close();
                     Log.e("STATUS", "CANNOT CONNECT TO DEVICE");
@@ -191,24 +233,7 @@ public class MainActivity extends AppCompatActivity {
 
             connectedThread = new ConnectedThread(bluetoothSocket);
             Log.e("CONNECTED", "CONNECTION AFTER CONNECTED THREAD");
-            connectedThread.run();
-        }
-
-        @RequiresApi(api = Build.VERSION_CODES.S)
-        private void turnBluetoothOn() {
-            try {
-                BluetoothAdapter bluetooth = BluetoothAdapter.getDefaultAdapter();
-
-                if (!bluetooth.isEnabled()) {
-                    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(activity, new String[] {Manifest.permission.BLUETOOTH_CONNECT}, BLUETOOTH_CONNECT_CODE);
-                        return;
-                    }
-                    bluetooth.enable();
-                }
-            } catch (Exception e) {
-                Log.e("ENABLE FAILED", "TURN BLUETOOTH ON");
-            }
+            connectedThread.start();
         }
 
         public void cancel() {
@@ -224,76 +249,73 @@ public class MainActivity extends AppCompatActivity {
         private final BluetoothSocket bluetoothSocket;
         private final InputStream inputStream;
         private final OutputStream outputStream;
-
+    
         public ConnectedThread(BluetoothSocket socket) {
             this.bluetoothSocket = socket;
             InputStream tempInput = null;
             OutputStream tempOutput = null;
-
+    
             try {
                 tempInput = socket.getInputStream();
                 tempOutput = socket.getOutputStream();
             } catch (IOException e) {
                 Log.e("SOCKET", "INPUT OUTPUT ERROR", e);
             }
-
+    
             this.inputStream = tempInput;
             this.outputStream = tempOutput;
         }
-
+    
+        @Override
         public void run() {
             byte[] buffer = new byte[1024];
             int bytes = 0;
-
+    
             Log.e("CONNECTED THREAD", "ARDUINO PHASE");
-
-            BluetoothGattCallback bluetoothGattCallback =
-                    new BluetoothGattCallback() {
-                        @Override
-                        public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-                            if (newState == BluetoothProfile.STATE_CONNECTED) {
-                                Log.e("BLUETOOTH PROFILE STATUS", "CONNECTED");
-                            }
-
+    
+                /* BluetoothGattCallback bluetoothGattCallback =
+                        new BluetoothGattCallback() {
+                            @Override
+                            public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
+                                if (newState == BluetoothProfile.STATE_CONNECTED) {
+                                    Log.e("BLUETOOTH PROFILE STATUS", "CONNECTED");
+                                }
+    
+                        } */
+                /*
+                while (true) {
+                    Log.e("ARDUINO PHASE", "ENTERED");
+                    try {
+                        // Read inputstream from Arduino until termination.
+                        buffer[bytes] = (byte) inputStream.read();
+                        String readMessage;
+    
+                        if (buffer[bytes] == '\n') {
+                            readMessage = new String(buffer, 0, bytes);
+                            Log.e("Arduino Message", readMessage);
+                            handler.obtainMessage(MESSAGE_READ, readMessage).sendToTarget();
+                            bytes = 0;
+                        } else {
+                            bytes++;
+                        }
+                    } catch (IOException e) {
+                        Log.e("ARDUINO PHASE", "CRASHED");
+                        break;
                     }
-
-
-            /*
-            while (true) {
-                Log.e("ARDUINO PHASE", "ENTERED");
-                try {
-                    // Read inputstream from Arduino until termination.
-                    buffer[bytes] = (byte) inputStream.read();
-                    String readMessage;
-
-                    if (buffer[bytes] == '\n') {
-                        readMessage = new String(buffer, 0, bytes);
-                        Log.e("Arduino Message", readMessage);
-                        handler.obtainMessage(MESSAGE_READ, readMessage).sendToTarget();
-                        bytes = 0;
-                    } else {
-                        bytes++;
-                    }
-                } catch (IOException e) {
-                    Log.e("ARDUINO PHASE", "CRASHED");
-                    break;
-                }
-                */
-
-            };
-
+                    */
+    
         }
-
+    
         public void write(String input) {
             byte[] bytes = input.getBytes();
-
+    
             try {
-                outputStream.write(bytes);
+                this.outputStream.write(bytes);
             } catch (IOException e) {
                 Log.e("Send Error", "Unable to send message", e);
             }
         }
-
+    
         public void cancel() {
             try {
                 bluetoothSocket.close();
@@ -306,7 +328,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-
         if (createConnectThread != null) {
             createConnectThread.cancel();
         }
