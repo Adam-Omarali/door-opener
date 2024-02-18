@@ -44,6 +44,7 @@ void loop()
 
     Serial.println("Forward");
     stepper.step(STEPS * 10);
+  }
     
   // } else {
   //   digitalWrite(TEST_LED, LOW); 
