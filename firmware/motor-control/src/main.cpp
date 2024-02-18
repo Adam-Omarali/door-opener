@@ -3,6 +3,8 @@
 #include "gyro.cpp"
 
 #define INTERBOARD_ANALOG A0
+#define MOTOR_STATUS_FROM_ESP32 A1
+#define MOTOR_STATUS_TOLERANCE = 100; 
 #define TOLERANCE 23
 #define TEST_LED 13
 
@@ -14,6 +16,9 @@ const int STEPS = 200;
 // attached to
 Stepper stepper(STEPS, 4, 5, 6, 7);
 
+bool max_reverse = true; 
+bool max_forward = false; 
+
 void setup()
 {
   angle_setup();
@@ -23,6 +28,7 @@ void setup()
 
   pinMode(INTERBOARD_ANALOG, INPUT); 
   pinMode(TEST_LED, OUTPUT);
+  pinMode(MOTOR_STATUS_FROM_ESP32, INPUT); 
 
   digitalWrite(TEST_LED, LOW); 
 }
@@ -42,4 +48,21 @@ void loop()
   // } else {
   //   digitalWrite(TEST_LED, LOW); 
   // }
+
+  if (analogRead(MOTOR_STATUS_FROM_ESP32) >= 1023 - MOTOR_STATUS_TOLERANCE && !max_forward) {
+    // Drive motor forward
+    stepper.step(STEPS); 
+    delay(5000); 
+    max_forward = true; 
+    max_reverse = false; 
+  }
+  else if (analogRead(MOTOR_STATUS_FROM_ESP32) <= MOTOR_STATUS_TOLERANCE && !max_reverse) {
+    stepper.step(-STEPS); 
+    delay(5000); 
+    max_forward = false; 
+    max_reverse = true; 
+  } 
+  else {
+    stepper.step(0); 
+  }
 }
