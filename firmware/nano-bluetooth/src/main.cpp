@@ -2,6 +2,9 @@
 
 #define LED 21 
 #define PAIRING_BUTTON 2 
+#define RX_PIN 2 
+
+//SoftwareSerial bluetooth()
 
 void setup() {
   pinMode(LED, OUTPUT); 

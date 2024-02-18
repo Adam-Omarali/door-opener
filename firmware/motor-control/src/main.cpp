@@ -39,11 +39,11 @@ void loop()
   // Serial.println("Forward");
   // stepper.step(STEPS * 10);
 
-  // if (analogRead(INTERBOARD_ANALOG) >= 1023 - TOLERANCE) {
-  //   digitalWrite(TEST_LED, HIGH); 
+  if (analogRead(INTERBOARD_ANALOG) >= 1023 - TOLERANCE) {
+    digitalWrite(TEST_LED, HIGH); 
 
-  //   Serial.println("Forward");
-  //   stepper.step(STEPS * 10);
+    Serial.println("Forward");
+    stepper.step(STEPS * 10);
     
   // } else {
   //   digitalWrite(TEST_LED, LOW); 
