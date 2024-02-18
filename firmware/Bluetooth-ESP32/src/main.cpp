@@ -41,7 +41,7 @@ void loop() {
     // Serial.write(c);
     // Serial.println(c);
 
-    command = SerialBT.readString(); 
+    command = SerialBT.readStringUntil('>'); 
     Serial.println(command);
   }
   

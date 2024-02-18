@@ -4,7 +4,7 @@
 
 #define INTERBOARD_ANALOG A0
 #define MOTOR_STATUS_FROM_ESP32 A1
-#define MOTOR_STATUS_TOLERANCE = 100; 
+#define MOTOR_STATUS_TOLERANCE 150
 #define TOLERANCE 23
 #define TEST_LED 13
 
@@ -21,22 +21,22 @@ bool max_forward = false;
 
 void setup()
 {
-  angle_setup();
+  // angle_setup();
   Serial.begin(9600);
   // set the speed of the motor to 30 RPMs
-  stepper.setSpeed(80);
+  // stepper.setSpeed(80);
 
-  pinMode(INTERBOARD_ANALOG, INPUT); 
-  pinMode(TEST_LED, OUTPUT);
+  // pinMode(INTERBOARD_ANALOG, INPUT); 
+  // pinMode(TEST_LED, OUTPUT);
   pinMode(MOTOR_STATUS_FROM_ESP32, INPUT); 
 
-  digitalWrite(TEST_LED, LOW); 
+  // digitalWrite(TEST_LED, LOW); 
 }
 
 void loop()
 {
-  get_angle();
-  Serial.println("Forward");
+  // get_angle();
+  // Serial.println("Forward");
   // stepper.step(STEPS * 10);
 
   // if (analogRead(INTERBOARD_ANALOG) >= 1023 - TOLERANCE) {
@@ -48,19 +48,14 @@ void loop()
   // } else {
   //   digitalWrite(TEST_LED, LOW); 
   // }
+  Serial.println(analogRead(MOTOR_STATUS_FROM_ESP32));
 
-  if (analogRead(MOTOR_STATUS_FROM_ESP32) >= 1023 - MOTOR_STATUS_TOLERANCE && !max_forward) {
+  if (analogRead(MOTOR_STATUS_FROM_ESP32) >= 1023 - MOTOR_STATUS_TOLERANCE) {
     // Drive motor forward
     stepper.step(STEPS); 
-    delay(5000); 
-    max_forward = true; 
-    max_reverse = false; 
   }
-  else if (analogRead(MOTOR_STATUS_FROM_ESP32) <= MOTOR_STATUS_TOLERANCE && !max_reverse) {
+  else if (analogRead(MOTOR_STATUS_FROM_ESP32) <= MOTOR_STATUS_TOLERANCE) {
     stepper.step(-STEPS); 
-    delay(5000); 
-    max_forward = false; 
-    max_reverse = true; 
   } 
   else {
     stepper.step(0); 
