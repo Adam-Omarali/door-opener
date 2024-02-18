@@ -126,13 +126,17 @@ public class SelectBluetoothDevice extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.S)
     private void requestBluetoothPermission() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.BLUETOOTH}, BLUETOOTH_CONNECT_REQUEST_CODE);
-        } else {
-            retrievePairedDevices();
-        }
+    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH)
+            != PackageManager.PERMISSION_GRANTED ||
+        ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADMIN)
+            != PackageManager.PERMISSION_GRANTED) {
+        
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN},
+                BLUETOOTH_CONNECT_REQUEST_CODE);
+    } else {
+        retrievePairedDevices();
+    }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.S)
