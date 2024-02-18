@@ -1,26 +1,48 @@
 #include <Arduino.h>
 #include <Stepper.h> 
 
-#define STEPS 200
-// Define stepper motor connections and motor interface type. Motor interface type must be set to 1 when using a driver
+// change this to the number of steps on your motor
+const int STEPS = 200;
 
-#define motorInterfaceType 1
-Stepper stepper(STEPS, 2, 3); // Pin 2 connected to DIRECTION & Pin 3 connected to STEP Pin of Driver
-
-int Pval = 0;
-
-int potVal = 0;
+// create an instance of the stepper class, specifying
+// the number of steps of the motor and the pins it's
+// attached to
+Stepper stepper(STEPS, 4, 5, 6, 7);
 
 
-void setup() {
-  // Set the maximum speed in steps per second:
+void setup()
+{
   Serial.begin(9600);
-
-  stepper.setSpeed(1000);
+  // set the speed of the motor to 30 RPMs
+  stepper.setSpeed(80);
 }
 
-void loop() {
-  stepper.step(10);
+void loop()
+{
+  Serial.println("Forward");
+  stepper.step(STEPS * 10);
+  delay(5000);
+}
+// #define STEPS 200
+// // Define stepper motor connections and motor interface type. Motor interface type must be set to 1 when using a driver
+
+// #define motorInterfaceType 1
+// Stepper stepper(STEPS, 2, 3); // Pin 2 connected to DIRECTION & Pin 3 connected to STEP Pin of Driver
+
+// int Pval = 0;
+
+// int potVal = 0;
+
+
+// void setup() {
+//   // Set the maximum speed in steps per second:
+//   Serial.begin(9600);
+
+//   stepper.setSpeed(1000);
+// }
+
+// void loop() {
+//   stepper.step(10);
   // potVal = map(analogRead(A0),0,1024,0,500);
   // if (potVal>Pval){
   //   stepper.step(10);
@@ -39,5 +61,5 @@ void loop() {
   //}
 
 
-Pval = potVal;
-}
+// Pval = potVal;
+// }
