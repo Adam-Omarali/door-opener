@@ -45,6 +45,11 @@ public class MainActivity extends AppCompatActivity {
 
     public static ConnectedThread connectedThread;
     public static CreateConnectThread createConnectThread;
+    private static final int REQUEST_ENABLE_BT = 0;
+
+    public static final int REQUEST_DISCOVER_BT = 1;
+
+    private BluetoothAdapter bluetoothAdapter;
 
     // MESSAGE CODES
     private final static int CONNECTING_STATUS = 1;
@@ -73,6 +78,23 @@ public class MainActivity extends AppCompatActivity {
             createConnectThread = new CreateConnectThread(bluetoothAdapter, deviceAddress, this, MainActivity.this);
             createConnectThread.run();
         }
+
+        // discover bluetooth button click
+        buttonConnect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.BLUETOOTH_SCAN)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(MainActivity.this,
+                            new String[] {Manifest.permission.BLUETOOTH_SCAN}, BLUETOOTH_CONNECT_CODE);
+                    return;
+                }
+                if (!bluetoothAdapter.isDiscovering()) {
+                    Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+                    startActivityForResult(intent, REQUEST_DISCOVER_BT);
+                }
+            }
+        });
 
         handler = new Handler(Looper.getMainLooper()) {
             @Override
@@ -104,6 +126,16 @@ public class MainActivity extends AppCompatActivity {
         buttonConnect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (!bluetoothAdapter.isEnabled()) {
+                    Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                    if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.BLUETOOTH_CONNECT)
+                            != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(MainActivity.this,
+                                new String[] {Manifest.permission.BLUETOOTH_CONNECT}, BLUETOOTH_CONNECT_CODE);
+                    }
+                    startActivityForResult(intent, REQUEST_ENABLE_BT);
+                }
+
                 Intent intent = new Intent(MainActivity.this, SelectBluetoothDevice.class);
                 startActivity(intent);
             }
