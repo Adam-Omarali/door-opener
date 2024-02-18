@@ -16,6 +16,7 @@ import android.net.wifi.p2p.WifiP2pManager.DeviceInfoListener;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -39,12 +40,22 @@ public class SelectBluetoothDevice extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_bluetooth_device);
 
+        final Button refresh_devices = findViewById(R.id.refresh_device);
+
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled()) {
             // Try reconnecting
             return;
         }
+
+        refresh_devices.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                searchForDevices();
+                requestBluetoothPermission();
+            }
+        });
 
         searchForDevices();
         requestBluetoothPermission();
@@ -95,6 +106,7 @@ public class SelectBluetoothDevice extends AppCompatActivity {
         deviceListAdapter = new DeviceListAdapter(this, deviceList);
         recyclerView.setAdapter(deviceListAdapter);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setNestedScrollingEnabled(true);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.S)
