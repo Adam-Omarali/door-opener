@@ -10,22 +10,19 @@
 #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
 #endif
 
-#define LED 23 
-#define READ_BLUETOOTH_BOARD_STATUS 0
-#define OUTPUT_MOTOR_BOARD_STATUS 11
+#define OUTPUT_MOTOR_BOARD_STATUS 4
 #define TOLERANCE 300
 
 BluetoothSerial SerialBT;
 String command; 
 
 void setup() {
-  Serial.begin(19200);
+  Serial.begin(9600);
   SerialBT.begin("ESP32-BLE"); //Bluetooth device name
   Serial.println("The device started, now you can pair it with bluetooth!");
 
-  pinMode(LED, OUTPUT); 
+  // pinMode(LED, OUTPUT); 
 
-  pinMode(READ_BLUETOOTH_BOARD_STATUS, INPUT); 
   pinMode(OUTPUT_MOTOR_BOARD_STATUS, OUTPUT); 
 }
 
@@ -33,7 +30,6 @@ void setup() {
 // BLUETOOTH BOARD -> ENABLES ESP32 BOARD -> ENABLES MOTOR BOARD
 
 void loop() {
-  digitalWrite(LED, HIGH); 
 
   command = "<no command>"; 
   
@@ -41,11 +37,12 @@ void loop() {
     SerialBT.write(Serial.read());
   }
   if (SerialBT.available()) {
-    char c = SerialBT.read();
-    Serial.write(c);
-    Serial.println(c);
+    // char c = SerialBT.read();
+    // Serial.write(c);
+    // Serial.println(c);
 
     command = SerialBT.readString(); 
+    Serial.println(command);
   }
   
   if (command == "<unlock door>") {
@@ -56,6 +53,6 @@ void loop() {
   }
   else {
     analogWrite(OUTPUT_MOTOR_BOARD_STATUS, 512); 
-    Serial.println("no command"); 
+    // Serial.println("no command"); 
   }
 }
