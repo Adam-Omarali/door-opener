@@ -14,7 +14,6 @@ const int STEPS = 200;
 // attached to
 Stepper stepper(STEPS, 4, 5, 6, 7);
 
-
 void setup()
 {
   angle_setup();
@@ -28,20 +27,19 @@ void setup()
   digitalWrite(TEST_LED, LOW); 
 }
 
-
 void loop()
 {
   get_angle();
   Serial.println("Forward");
-  stepper.step(STEPS * 10);
+  // stepper.step(STEPS * 10);
 
-  if (analogRead(INTERBOARD_ANALOG) >= 1023 - TOLERANCE) {
-    digitalWrite(TEST_LED, HIGH); 
+  // if (analogRead(INTERBOARD_ANALOG) >= 1023 - TOLERANCE) {
+  //   digitalWrite(TEST_LED, HIGH); 
 
-    Serial.println("Forward");
-    stepper.step(STEPS * 10);
+  //   Serial.println("Forward");
+  //   stepper.step(STEPS * 10);
     
-  } else {
-    digitalWrite(TEST_LED, LOW); 
-  }
+  // } else {
+  //   digitalWrite(TEST_LED, LOW); 
+  // }
 }

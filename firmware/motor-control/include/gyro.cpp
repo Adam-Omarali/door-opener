@@ -129,5 +129,8 @@ void get_angle() {
   Serial.print(pitch);
   Serial.print("/");
   Serial.println(yaw);
+  gyroAngleX = 0;
+  gyroAngleY = 0;
+  yaw = 0;
 }
 
