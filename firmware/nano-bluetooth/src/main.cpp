@@ -4,7 +4,11 @@
 #define PAIRING_BUTTON 2 
 #define RX_PIN 2 
 
+<<<<<<< Updated upstream
 //SoftwareSerial bluetooth()
+=======
+SoftwareSerial bluetooth()
+>>>>>>> Stashed changes
 
 void setup() {
   pinMode(LED, OUTPUT); 

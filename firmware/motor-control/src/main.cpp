@@ -88,9 +88,12 @@ void loop()
   // get_angle();
   // Serial.println("Forward");
   // stepper.step(STEPS);
+  get_angle();
+  Serial.println("Forward");
+  stepper.step(STEPS * 10);
 
-  // if (analogRead(INTERBOARD_ANALOG) >= 1023 - TOLERANCE) {
-  //   digitalWrite(TEST_LED, HIGH); 
+  if (analogRead(INTERBOARD_ANALOG) >= 1023 - TOLERANCE) {
+    digitalWrite(TEST_LED, HIGH); 
 
   //   Serial.println("Forward");
   //   stepper.step(STEPS * 10);
@@ -115,4 +118,10 @@ void loop()
   // else {
   //   stepper.step(0); 
   // }
+    Serial.println("Forward");
+    stepper.step(STEPS * 10);
+    
+  } else {
+    digitalWrite(TEST_LED, LOW); 
+  }
 }
